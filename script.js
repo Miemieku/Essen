@@ -14,6 +14,9 @@ document.addEventListener("DOMContentLoaded", function() {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+        // 📌 绑定搜索功能
+    setupSearch();
+
     // ✅ 加载 `GeoJSON`，但初始时不添加到地图
     initializeGeoJSONLayers();
 
@@ -78,4 +81,56 @@ function setupLayerToggle() {
             }
         });
     });
+}
+
+function setupSearch() {
+    const searchBox = document.getElementById("search-box");
+    const searchButton = document.getElementById("search-button");
+    
+    searchButton.addEventListener("click", function () {
+        const address = searchBox.value;
+        if (address) {
+            searchAddress(address);
+        } else {
+            alert("Bitte geben Sie eine Adresse ein.");
+        }
+    });
+
+    // 允许用户按 "Enter" 触发搜索
+    searchBox.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            searchButton.click();
+        }
+    });
+}
+
+function searchAddress(address) {
+    // 使用 OSM Nominatim API 进行地址查询
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                const lat = data[0].lat;
+                const lon = data[0].lon;
+                console.log(`Adresse gefunden: ${lat}, ${lon}`);
+
+                // 清除之前的标记
+                if (window.searchMarker) {
+                    map.removeLayer(window.searchMarker);
+                }
+
+                // 在地图上显示地址位置
+                window.searchMarker = L.marker([lat, lon]).addTo(map)
+                    .bindPopup(`<b>${address}</b><br>Latitude: ${lat}<br>Longitude: ${lon}`)
+                    .openPopup();
+
+                // 地图聚焦到新位置
+                map.setView([lat, lon], 15);
+            } else {
+                alert("Adresse nicht gefunden. Bitte versuchen Sie es mit einer genaueren Eingabe.");
+            }
+        })
+        .catch(error => console.error("Fehler beim Suchen der Adresse:", error));
 }
