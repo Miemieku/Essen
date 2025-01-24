@@ -1,0 +1,103 @@
+/* 🔹 全局布局 */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+/* 🔹 顶部导航栏 */
+/* 🔹 确保 `header` 的层级比 `sidebar` 高 */
+header {
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 16px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    height: 50px;
+    z-index: 2000; /* ✅ 确保 `header` 在 `sidebar` 之上 */
+}
+
+/* 🔹 左侧菜单按钮（☰） */
+#menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+/* 🔹 主内容容器（地图 + 侧边栏） */
+#main-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 50px); /* 让内容填充整个屏幕，顶部留给导航栏 */
+    margin-top: 50px;
+}
+/* 🔹 侧边栏（默认隐藏） */
+#sidebar-container {
+    position: fixed;
+    left: -250px; /* 默认隐藏在屏幕外 */
+    top: 50px;
+    width: 250px;
+    height: calc(100vh - 50px);
+    background: white;
+    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s ease-in-out;
+    z-index: 1500;
+}
+/* 🔹 侧边栏展开状态 */
+#sidebar-container.active {
+    left: 0; /* 显示侧边栏 */
+}
+/* 🔹 侧边栏内容 */
+#sidebar {
+    padding: 15px;
+}
+/* 🔹 关闭按钮 */
+#close-sidebar {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    float: right;
+}
+/* 🔹 数据选项列表 */
+#data-layer-list {
+    list-style: none;
+    padding: 0;
+}
+#data-layer-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    padding: 5px 10px;
+}
+
+/* 🔹 右侧地图（占据整个剩余空间） */
+#map-container {
+    flex-grow: 1;
+    height: calc(100vh - 50px);
+}
+
+/* 🔹 让地图铺满 */
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+/* 🔹 让地图缩放控件（+ 和 - 按钮）固定在右下角 */
+.leaflet-control-zoom {
+    position: absolute !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    display: block !important; /* ✅ 确保控件可见 */
+}
