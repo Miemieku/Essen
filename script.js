@@ -4,7 +4,7 @@ var map;
 document.addEventListener("DOMContentLoaded", function() {
     // 1️⃣ 初始化地图
     map = L.map('map', {
-        center: [51.2277, 6.7735],
+        center: [51.455643, 7.011555],
         zoom: 12,
         zoomControl: false // 禁用默认控件
     });
