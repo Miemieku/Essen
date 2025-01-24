@@ -31,30 +31,36 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-
 function loadGeoJSON() {
-    fetch('data.json')  // 5️⃣ 发送请求，获取 `data.json`
-        .then(response => response.json()) // 6️⃣ 解析 JSON 数据
-        .then(data => {
-            console.log("Geladene Daten:", data); // 7️⃣ 在 Console 里打印数据，方便调试
+    const geojsonFiles = [
+        { url: "kitas_2024_2025.geojson", color: "green", name: "Kindertagesstaetten" },
+        { url: "Schulen_2024_2025.geojson", color: "blue", name: "Schulen" },
+        { url: "Stadtbezirke_WGS84.geojson", color: "purple", name: "Stadtbezirke" },
+        { url: "Stadtgrenze_WGS84.geojson", color: "red", name: "Stadtgrenze" },
+        { url: "Stadtteile_WGS84.geojson", color: "green", name: "Stadtteile" }
+    ];
 
-            // 8️⃣ 确保 `map` 存在，否则停止执行
-            console.log("Map Object:", map);
-            if (!map) {
-                console.error("❌ Fehler: map ist nicht definiert!");
-                return;
-            }
+    geojsonFiles.forEach(file => {
+        fetch(file.url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(`Geladene Daten von ${file.name}:`, data);
 
-            // 9️⃣ 在地图上加载 `data.json` 里的点
-            L.geoJSON(data, {
-                onEachFeature: function (feature, layer) {
-                    layer.bindPopup(`
-                        <b>${feature.properties.name}</b><br>
-                        Luftqualität: ${feature.properties.air_quality}<br>
-                        Verkehrslage: ${feature.properties.traffic}
-                    `);
-                }
-            }).addTo(map);
-        })
-        .catch(error => console.error("Fehler beim Laden der Daten:", error)); // 10️⃣ 处理错误（比如 `data.json` 文件不存在）
+                L.geoJSON(data, {
+                    style: function(feature) {
+                        return { color: file.color, weight: 2, fillOpacity: 0.3 };
+                    },
+                    pointToLayer: function(feature, latlng) {
+                        return L.circleMarker(latlng, { radius: 6, color: file.color });
+                    },
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties && feature.properties.name) {
+                            layer.bindPopup(`<b>${file.name}:</b> ${feature.properties.name}`);
+                        }
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error(`❌ Fehler beim Laden von ${file.name}:`, error));
+    });
 }
+
