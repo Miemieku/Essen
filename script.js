@@ -1,44 +1,41 @@
-// 1️⃣ 创建一个全局变量 `map`
+// 1️⃣ 创建地图，默认显示埃森（Essen）
 var map;
 
 document.addEventListener("DOMContentLoaded", function() {
-    // 1️⃣ 初始化地图
     map = L.map('map', {
-        center: [51.455643, 7.011555],
+        center: [51.455643, 7.011555], // Essen 的坐标
         zoom: 12,
-        zoomControl: false // 禁用默认控件
+        zoomControl: false
     });
 
-    // 2️⃣ 添加放大缩小控件
-    L.control.zoom({
-        position: 'bottomright'
-    }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // 3️⃣ 加载地图瓦片（OpenStreetMap）
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // 4️⃣ 读取 `data.json` 并加载数据
-    loadGeoJSON();
+    // ✅ 加载 `GeoJSON`，但初始时不添加到地图
+    initializeGeoJSONLayers();
 
     // 🔹 侧边栏控制逻辑
-    var sidebar = document.getElementById("sidebar-container"); // ✅ 选取 `#sidebar-container`
+    var sidebar = document.getElementById("sidebar-container");
     var menuToggle = document.getElementById("menu-toggle");
-    
+
     menuToggle.addEventListener("click", function() {
-        sidebar.classList.toggle("active"); // ✅ 让 `active` 类正确作用在 `#sidebar-container`
+        sidebar.classList.toggle("active");
     });
 });
 
-function loadGeoJSON() {
-    const geojsonFiles = [
-        { url: "kitas_2024_2025.geojson", color: "green", name: "Kindertagesstaetten" },
-        { url: "Schulen_2024_2025.geojson", color: "blue", name: "Schulen" },
-        { url: "Stadtteile_WGS84.geojson", color: "green", name: "Stadtteile" },
-        { url: "Stadtbezirke_WGS84.geojson", color: "purple", name: "Stadtbezirke" },
-        { url: "Stadtgrenze_WGS84.geojson", color: "red", name: "Stadtgrenze" }
+// 2️⃣ 存储 GeoJSON 图层（但不默认添加到地图）
+const layerGroups = {}; 
 
+function initializeGeoJSONLayers() {
+    const geojsonFiles = [
+        { url: "kitas_2024_2025.geojson", color: "green", name: "kindertagesstaetten" },
+        { url: "Schulen_2024_2025.geojson", color: "blue", name: "schulen" },
+        { url: "Stadtteile_WGS84.geojson", color: "green", name: "stadtteile" },
+        { url: "Stadtbezirke_WGS84.geojson", color: "purple", name: "stadtbezirke" },
+        { url: "Stadtgrenze_WGS84.geojson", color: "red", name: "stadtgrenze" }
     ];
 
     geojsonFiles.forEach(file => {
@@ -47,7 +44,7 @@ function loadGeoJSON() {
             .then(data => {
                 console.log(`Geladene Daten von ${file.name}:`, data);
 
-                L.geoJSON(data, {
+                let layer = L.geoJSON(data, {
                     style: function(feature) {
                         return { color: file.color, weight: 2, fillOpacity: 0.3 };
                     },
@@ -59,9 +56,26 @@ function loadGeoJSON() {
                             layer.bindPopup(`<b>${file.name}:</b> ${feature.properties.name}`);
                         }
                     }
-                }).addTo(map);
+                });
+
+                layerGroups[file.name] = layer; // ✅ 存储图层，但不 `addTo(map)`
             })
             .catch(error => console.error(`❌ Fehler beim Laden von ${file.name}:`, error));
     });
+
+    // 3️⃣ 绑定左侧菜单栏复选框
+    setupLayerToggle();
 }
 
+// 4️⃣ 复选框控制数据可见性
+function setupLayerToggle() {
+    document.querySelectorAll('#data-layer-list input').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                map.addLayer(layerGroups[this.id]); // ✅ 添加图层到地图
+            } else {
+                map.removeLayer(layerGroups[this.id]); // ✅ 从地图移除
+            }
+        });
+    });
+}
