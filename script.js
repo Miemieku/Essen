@@ -35,9 +35,10 @@ function loadGeoJSON() {
     const geojsonFiles = [
         { url: "kitas_2024_2025.geojson", color: "green", name: "Kindertagesstaetten" },
         { url: "Schulen_2024_2025.geojson", color: "blue", name: "Schulen" },
+        { url: "Stadtteile_WGS84.geojson", color: "green", name: "Stadtteile" }
         { url: "Stadtbezirke_WGS84.geojson", color: "purple", name: "Stadtbezirke" },
         { url: "Stadtgrenze_WGS84.geojson", color: "red", name: "Stadtgrenze" },
-        { url: "Stadtteile_WGS84.geojson", color: "green", name: "Stadtteile" }
+
     ];
 
     geojsonFiles.forEach(file => {
