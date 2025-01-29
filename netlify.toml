@@ -1,3 +1,4 @@
-
 [build]
-  functions = "netlify/functions"
+  publish = "public"        # 🚀 你的前端 HTML/JS 代码目录
+  functions = "netlify/functions"   # 🚀 Netlify Functions 目录
+
