@@ -134,6 +134,19 @@ function searchAddress(address) {
         })
         .catch(error => console.error("Fehler beim Suchen der Adresse:", error));
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("air-quality").addEventListener("change", function () {
+        if (this.checked) {
+            loadAirQualityData();
+        } else {
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker) map.removeLayer(layer);
+            });
+        }
+    });
+});
+
 function loadAirQualityData() {
     const url = "https://www.umweltbundesamt.de/api/air_data/v3/airquality/json?date_from=2024-01-01&time_from=9&date_to=2024-01-01&time_to=9&station=6";
 
