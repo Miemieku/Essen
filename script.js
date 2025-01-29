@@ -148,9 +148,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
-
 function loadAirQuality() {
-    const apiToken = "DEIN_API_TOKEN";  // ✅ 在 waqi.info 申请 API 令牌
+    const apiToken = "DEIN_API_TOKEN";
     const url = `https://api.waqi.info/feed/essen/?token=${apiToken}`;
 
     fetch(url)
@@ -161,28 +160,26 @@ function loadAirQuality() {
                 return;
             }
 
-            const aqi = data.data.aqi; // 获取空气质量指数
-            const pollutants = data.data.iaqi; // 获取污染物信息
+            const aqi = data.data.aqi;
+            const pollutants = data.data.iaqi;
 
-            // 创建测量点图层
             airQualityLayer = L.layerGroup();
-            let marker = L.marker([51.455643, 7.011555]) // Essen 的中心
-                .bindPopup(`
-                    <b>Luftqualität in Essen</b><br>
-                    AQI: ${aqi}<br>
-                    PM2.5: ${pollutants.pm25?.v || "N/A"} µg/m³<br>
-                    PM10: ${pollutants.pm10?.v || "N/A"} µg/m³<br>
-                    O₃: ${pollutants.o3?.v || "N/A"} µg/m³<br>
-                    NO₂: ${pollutants.no2?.v || "N/A"} µg/m³<br>
-                    SO₂: ${pollutants.so2?.v || "N/A"} µg/m³<br>
-                    CO: ${pollutants.co?.v || "N/A"} µg/m³
-                `);
-            
+            let marker = L.marker([51.455643, 7.011555])
+                .on("click", function () {
+                    document.getElementById("air-quality-info").innerHTML = `
+                        <h3>Luftqualität in Essen</h3>
+                        <p><b>AQI:</b> ${aqi}</p>
+                        <p><b>PM2.5:</b> ${pollutants.pm25?.v || "N/A"} µg/m³</p>
+                        <p><b>PM10:</b> ${pollutants.pm10?.v || "N/A"} µg/m³</p>
+                        <p><b>O₃:</b> ${pollutants.o3?.v || "N/A"} µg/m³</p>
+                        <p><b>NO₂:</b> ${pollutants.no2?.v || "N/A"} µg/m³</p>
+                        <p><b>SO₂:</b> ${pollutants.so2?.v || "N/A"} µg/m³</p>
+                        <p><b>CO:</b> ${pollutants.co?.v || "N/A"} µg/m³</p>
+                    `;
+                });
+
             airQualityLayer.addLayer(marker);
             map.addLayer(airQualityLayer);
-
-            // 地图自动缩放到测量点
-            map.setView([51.455643, 7.011555], 12);
         })
         .catch(error => console.error("Fehler beim Laden der Luftqualität:", error));
 }
