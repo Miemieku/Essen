@@ -134,3 +134,55 @@ function searchAddress(address) {
         })
         .catch(error => console.error("Fehler beim Suchen der Adresse:", error));
 }
+
+// 1️⃣ Luftqualität 图层
+let airQualityLayer;
+
+document.addEventListener("DOMContentLoaded", function () {
+    // 绑定空气质量复选框
+    document.getElementById("air-quality").addEventListener("change", function () {
+        if (this.checked) {
+            loadAirQuality();
+        } else {
+            map.removeLayer(airQualityLayer);
+        }
+    });
+});
+
+function loadAirQuality() {
+    const apiToken = "DEIN_API_TOKEN";  // ✅ 在 waqi.info 申请 API 令牌
+    const url = `https://api.waqi.info/feed/essen/?token=${apiToken}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== "ok") {
+                alert("Fehler beim Abrufen der Luftqualität");
+                return;
+            }
+
+            const aqi = data.data.aqi; // 获取空气质量指数
+            const pollutants = data.data.iaqi; // 获取污染物信息
+
+            // 创建测量点图层
+            airQualityLayer = L.layerGroup();
+            let marker = L.marker([51.455643, 7.011555]) // Essen 的中心
+                .bindPopup(`
+                    <b>Luftqualität in Essen</b><br>
+                    AQI: ${aqi}<br>
+                    PM2.5: ${pollutants.pm25?.v || "N/A"} µg/m³<br>
+                    PM10: ${pollutants.pm10?.v || "N/A"} µg/m³<br>
+                    O₃: ${pollutants.o3?.v || "N/A"} µg/m³<br>
+                    NO₂: ${pollutants.no2?.v || "N/A"} µg/m³<br>
+                    SO₂: ${pollutants.so2?.v || "N/A"} µg/m³<br>
+                    CO: ${pollutants.co?.v || "N/A"} µg/m³
+                `);
+            
+            airQualityLayer.addLayer(marker);
+            map.addLayer(airQualityLayer);
+
+            // 地图自动缩放到测量点
+            map.setView([51.455643, 7.011555], 12);
+        })
+        .catch(error => console.error("Fehler beim Laden der Luftqualität:", error));
+}
