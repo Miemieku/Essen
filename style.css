@@ -105,7 +105,7 @@ header {
 #search-container {
     position: absolute;
     top: 70px; /* ✅ 原来是 10px，调整到 60px 以避免被 `header` 遮挡 */
-    left: 10%;
+    left: 30%;
     transform: translateX(-50%);
     z-index: 3000; /* ✅ 提高 `z-index`，确保搜索框在 header 之上 */
     background: white;
