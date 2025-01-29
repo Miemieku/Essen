@@ -134,52 +134,62 @@ function searchAddress(address) {
         })
         .catch(error => console.error("Fehler beim Suchen der Adresse:", error));
 }
-
-// 1️⃣ Luftqualität 图层
+// 5 Luftqualität 图层
 let airQualityLayer;
 
 document.addEventListener("DOMContentLoaded", function () {
     // 绑定空气质量复选框
     document.getElementById("air-quality").addEventListener("change", function () {
         if (this.checked) {
-            loadAirQuality();
+            loadAirQualityStations();
         } else {
             map.removeLayer(airQualityLayer);
         }
     });
 });
-function loadAirQuality() {
-    const apiToken = "DEIN_API_TOKEN";
-    const url = `https://api.waqi.info/feed/essen/?token=${apiToken}`;
 
-    fetch(url)
+function loadAirQualityStations() {
+    const stationsUrl = "https://www.umweltbundesamt.de/api/air_data/v3/stations";
+
+    fetch(stationsUrl)
         .then(response => response.json())
-        .then(data => {
-            if (data.status !== "ok") {
-                alert("Fehler beim Abrufen der Luftqualität");
-                return;
-            }
-
-            const aqi = data.data.aqi;
-            const pollutants = data.data.iaqi;
-
+        .then(stations => {
             airQualityLayer = L.layerGroup();
-            let marker = L.marker([51.455643, 7.011555])
-                .on("click", function () {
-                    document.getElementById("air-quality-info").innerHTML = `
-                        <h3>Luftqualität in Essen</h3>
-                        <p><b>AQI:</b> ${aqi}</p>
-                        <p><b>PM2.5:</b> ${pollutants.pm25?.v || "N/A"} µg/m³</p>
-                        <p><b>PM10:</b> ${pollutants.pm10?.v || "N/A"} µg/m³</p>
-                        <p><b>O₃:</b> ${pollutants.o3?.v || "N/A"} µg/m³</p>
-                        <p><b>NO₂:</b> ${pollutants.no2?.v || "N/A"} µg/m³</p>
-                        <p><b>SO₂:</b> ${pollutants.so2?.v || "N/A"} µg/m³</p>
-                        <p><b>CO:</b> ${pollutants.co?.v || "N/A"} µg/m³</p>
-                    `;
-                });
 
-            airQualityLayer.addLayer(marker);
+            stations.forEach(station => {
+                if (station.name.includes("Essen")) { // 只显示 Essen 的测量站
+                    let marker = L.marker([station.latitude, station.longitude])
+                        .bindPopup(`<b>${station.name}</b><br>Klicken für Details`)
+                        .on("click", function () {
+                            loadAirQualityData(station.station_id, station.name);
+                        });
+
+                    airQualityLayer.addLayer(marker);
+                }
+            });
+
             map.addLayer(airQualityLayer);
         })
-        .catch(error => console.error("Fehler beim Laden der Luftqualität:", error));
+        .catch(error => console.error("Fehler beim Laden der Luftqualitätsstationen:", error));
+}
+
+function loadAirQualityData(stationId, stationName) {
+    const dateFrom = "2024-01-01";
+    const dateTo = "2024-01-30";
+    const pollutants = ["pm10", "pm25", "o3", "no2", "so2", "co"];
+    
+    const promises = pollutants.map(pollutant => 
+        fetch(`https://www.umweltbundesamt.de/api/air_data/v3/airquality?station=${stationId}&date_from=${dateFrom}&date_to=${dateTo}&pollutant=${pollutant}&lang=de`)
+            .then(response => response.json())
+            .then(data => ({ pollutant, value: data[0]?.value || "N/A" }))
+    );
+
+    Promise.all(promises).then(results => {
+        let infoHTML = `<h3>${stationName}</h3>`;
+        results.forEach(result => {
+            infoHTML += `<p><b>${result.pollutant.toUpperCase()}:</b> ${result.value} µg/m³</p>`;
+        });
+
+        document.getElementById("air-quality-info").innerHTML = infoHTML;
+    });
 }
