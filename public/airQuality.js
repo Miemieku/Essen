@@ -12,17 +12,26 @@ function getCurrentTime() {
 
 // 2️⃣ 获取空气质量数据
 function fetchAirQualityData(stationId) {
-    const { date, hour } = getCurrentTime();
+    const now = new Date();
+    let date = now.toISOString().split("T")[0]; // YYYY-MM-DD
+    let hour = now.getHours() - 1; // 🚀 取上一个小时的数据
+
+    // ⏰ 确保小时数不为负数（午夜 00:00 时，避免 -1）
+    if (hour < 0) {
+        hour = 23; // 取前一天的 23:00 数据
+        date = new Date(now.setDate(now.getDate() - 1)).toISOString().split("T")[0]; // 取前一天的日期
+    }
+
     const apiUrl = `${API_BASE_URL}date_from=${date}&date_to=${date}&time_from=${hour}&time_to=${hour}&station=${stationId}`;
 
-    console.log(`🔍 API Anfrage: ${apiUrl}`);
+    console.log(`📡 API Anfrage: ${apiUrl}`); // ✅ 确保 URL 正确
 
     return fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             console.log(`📌 API Antwort für ${stationId}:`, data);
 
-            // ✅ 获取 API 返回的 `stationId`
+            // ✅ 处理 API 响应，确保 stationId 正确
             const actualStationId = Object.keys(data.data)[0]; 
             console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
