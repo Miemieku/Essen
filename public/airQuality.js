@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/functions/ubaProxy/airQualityProxy?";
+const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/functions/ubaProxy/airQualityProxy";
 const stations = ["DENW134", "DENW043", "DENW247", "DENW024"];
 let mapMarkers = {}; // 存储测量站点的 Marker
 
