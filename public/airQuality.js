@@ -43,7 +43,10 @@ function addStationsToMap() {
             }
 
             let timestamps = Object.keys(data.data[stationId]);
-            if (timestamps.length === 0) return;
+            if (timestamps.length === 0) {
+                console.warn(`⚠️ Keine Messwerte für ${stationId}`);
+                return;
+            }
             let latestTimestamp = timestamps[timestamps.length - 1];
             let pollutantData = data.data[stationId][latestTimestamp].slice(3);
 
@@ -54,12 +57,21 @@ function addStationsToMap() {
 
             let latLng = getStationCoordinates(stationId);
             let marker = L.marker(latLng).bindPopup(popupContent);
+
+            console.log(`📍 Station ${stationId} Marker erstellt:`, marker); // ✅ 检查 Marker 是否创建成功
+
+            if (!marker) {
+                console.error(`❌ Fehler: Marker für ${stationId} ist undefined`);
+                return;
+            }
+
             marker.on("click", () => showDataInPanel(stationId, latestTimestamp, pollutantData));
             marker.addTo(map);
             mapMarkers[stationId] = marker;
         });
     });
 }
+
 
 // 4️⃣ 获取测量站的地理坐标
 function getStationCoordinates(stationId) {
@@ -69,7 +81,12 @@ function getStationCoordinates(stationId) {
         "DENW247": [51.4609, 7.0098],
         "DENW024": [51.4550, 7.0200]
     };
-    return stationCoords[stationId] || [51.455643, 7.011555]; // 默认 Essen 坐标
+
+    if (!stationCoords[stationId]) {
+        console.warn(`⚠️ Keine Koordinaten für ${stationId} gefunden, Standardwert wird verwendet.`);
+        return [51.455643, 7.011555]; // 默认坐标
+    }
+    return stationCoords[stationId];
 }
 
 // 5️⃣ 在右侧面板显示空气质量数据
