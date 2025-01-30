@@ -50,24 +50,26 @@ function fetchAirQualityData(stationId) {
 }
 
 
-// 3️⃣ 在地图上添加测量站点
 function addStationsToMap() {
     stations.forEach(stationId => {
-        fetchAirQualityData(stationId).then(data => {
-            if (!data || !data.data || !data.data[stationId]) {
+        fetchAirQualityData(stationId).then(result => {
+            if (!result || !result.data) {
                 console.warn(`⚠️ Keine Luftqualitätsdaten für ${stationId}`);
                 return;
             }
 
-            let timestamps = Object.keys(data.data[stationId]);
+            let actualStationId = result.stationId; // ✅ 确保使用 API 返回的 Station ID
+            let timestamps = Object.keys(result.data);
+
             if (timestamps.length === 0) {
-                console.warn(`⚠️ Keine Messwerte für ${stationId}`);
+                console.warn(`⚠️ Keine Messwerte für ${actualStationId}`);
                 return;
             }
-            let latestTimestamp = timestamps[timestamps.length - 1];
-            let pollutantData = data.data[stationId][latestTimestamp].slice(3);
 
-            let popupContent = `<h3>Messstation ${stationId}</h3><p><b>Messzeit:</b> ${latestTimestamp}</p>`;
+            let latestTimestamp = timestamps[timestamps.length - 1];
+            let pollutantData = result.data[latestTimestamp].slice(3);
+
+            let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${latestTimestamp}</p>`;
             pollutantData.forEach(entry => {
                 popupContent += `<p><b>ID ${entry[0]}:</b> ${entry[1]} µg/m³</p>`;
             });
@@ -75,16 +77,15 @@ function addStationsToMap() {
             let latLng = getStationCoordinates(stationId);
             let marker = L.marker(latLng).bindPopup(popupContent);
 
-            console.log(`📍 Station ${stationId} Marker erstellt:`, marker); // ✅ 检查 Marker 是否创建成功
-
             if (!marker) {
                 console.error(`❌ Fehler: Marker für ${stationId} ist undefined`);
                 return;
             }
 
-            marker.on("click", () => showDataInPanel(stationId, latestTimestamp, pollutantData));
+            console.log(`📍 Station ${actualStationId} Marker erstellt:`, marker);
+            marker.on("click", () => showDataInPanel(actualStationId, latestTimestamp, pollutantData));
             marker.addTo(map);
-            mapMarkers[stationId] = marker;
+            mapMarkers[actualStationId] = marker; // ✅ 使用实际 Station ID 存储 Marker
         });
     });
 }
