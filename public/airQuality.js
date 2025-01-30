@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/functions/ubaProxy";
+const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/functions/ubaProxy/airQualityProxy?";
 const stations = ["DENW134", "DENW043", "DENW247", "DENW024"];
 let mapMarkers = {}; // 存储测量站点的 Marker
 
@@ -13,7 +13,7 @@ function getCurrentTime() {
 // 2️⃣ 获取空气质量数据
 function fetchAirQualityData(stationId) {
     const { date, hour } = getCurrentTime();
-    const apiUrl = `${API_BASE_URL}/airQualityProxy?date_from=${date}&date_to=${date}&time_from=${hour}&time_to=${hour}&station=${stationId}`;
+    const apiUrl = `${API_BASE_URL}date_from=${date}&date_to=${date}&time_from=${hour}&time_to=${hour}&station=${stationId}`;
 
     return fetch(apiUrl)
         .then(response => response.json())
