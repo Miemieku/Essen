@@ -15,13 +15,23 @@ function fetchAirQualityData(stationId) {
     const { date, hour } = getCurrentTime();
     const apiUrl = `${API_BASE_URL}date_from=${date}&date_to=${date}&time_from=${hour}&time_to=${hour}&station=${stationId}`;
 
+    console.log(`📡 Anfrage an API: ${apiUrl}`); // ✅ 先打印 API 请求 URL
+
     return fetch(apiUrl)
-        .then(response => response.json())
-        .catch(error => {
-            console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error);
-            return null;
-        });
+        .then(response => {
+            console.log(`📡 API Antwort Status für ${stationId}:`, response.status); // ✅ 检查 API 响应状态
+            if (!response.ok) {
+                throw new Error(`❌ API Fehler ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`📊 API Daten für ${stationId}:`, data); // ✅ 检查 API 数据
+            return data;
+        })
+        .catch(error => console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error));
 }
+
 
 // 3️⃣ 在地图上添加测量站点
 function addStationsToMap() {
