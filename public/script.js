@@ -138,33 +138,41 @@ function searchAddress(address) {
 // 1️⃣ 存储污染物索引
 let componentIndex = {};
 
-// 2️⃣ 获取污染物索引
+// 2️⃣ 获取污染物索引（改为请求 Netlify Functions 代理）
 function loadComponentIndex() {
-    fetch("https://www.umweltbundesamt.de/api/air_data/v3/components/json")
+    fetch("https://your-netlify-site.netlify.app/.netlify/functions/ubaProxy") // ✅ 代理 API
         .then(response => response.json())
         .then(data => {
             console.log("🔍 Komponenten-Index:", data);
-            if (!data || !data.components) {
-                alert("❌ Keine Komponenten-Daten verfügbar.");
+            if (!data) {
+                console.error("❌ Keine Komponenten-Daten verfügbar.");
                 return;
             }
             // 存储污染物索引
-            for (let id in data.components) {
-                componentIndex[id] = {
-                    name: data.components[id].name,
-                    unit: data.components[id].unit,
-                    description: data.components[id].description
-                };
+            for (let id in data) {
+                if (!isNaN(id)) { // 只处理 ID 作为键的数据
+                    componentIndex[id] = {
+                        name: data[id][1],  // 组件代码 (如 "PM10")
+                        symbol: data[id][2], // 组件符号 (如 "PM₁₀")
+                        unit: data[id][3],  // 组件单位 (如 "µg/m³")
+                        description: data[id][4] // 组件完整名称 (如 "Particulate matter")
+                    };
+                }
             }
             console.log("✅ Komponenten-Index gespeichert:", componentIndex);
         })
         .catch(error => console.error("❌ Fehler beim Laden der Komponenten:", error));
 }
-
 // 3️⃣ 获取最新空气质量数据
 function getLatestAirQualityData(stationId) {
+    if (Object.keys(componentIndex).length === 0) {
+        console.warn("⚠️ Komponenten-Index noch nicht geladen, warte 2 Sekunden...");
+        setTimeout(() => getLatestAirQualityData(stationId), 2000);
+        return;
+    }
+
     const today = new Date().toISOString().split("T")[0];
-    const url = `https://www.umweltbundesamt.de/api/air_data/v3/airquality/json?date_from=${today}&date_to=${today}&time_from=0&time_to=23&station=${stationId}`;
+    const url = `https://your-netlify-site.netlify.app/.netlify/functions/airQualityProxy?date_from=${today}&date_to=${today}&time_from=0&time_to=23&station=${stationId}`;
 
     fetch(url)
         .then(response => response.json())
@@ -187,11 +195,11 @@ function getLatestAirQualityData(stationId) {
             // 5️⃣ 解析污染物数据
             let popupContent = `<h3>Luftqualität (${latestTimestamp})</h3>`;
             pollutantData.forEach(entry => {
-                let pollutantId = entry[0];
+                let pollutantId = entry[0].toString(); // 确保 ID 是字符串
                 let value = entry[1];
                 let pollutantInfo = componentIndex[pollutantId] || { name: `ID ${pollutantId}`, unit: "" };
 
-                popupContent += `<p><b>${pollutantInfo.name}:</b> ${value} ${pollutantInfo.unit}</p>`;
+                popupContent += `<p><b>${pollutantInfo.name} (${pollutantInfo.symbol}):</b> ${value} ${pollutantInfo.unit}</p>`;
             });
 
             // 6️⃣ 清除旧的空气质量点
