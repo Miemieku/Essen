@@ -3,6 +3,17 @@ const stations = ["DENW134", "DENW043", "DENW247", "DENW024"];
 let mapMarkers = {}; // 存储测量站点的 Marker
 let airQualityData = {}; // 全局存储空气质量数据
 
+// Load station coordinates from a JSON file
+let stationCoords = {};
+fetch('/path/to/stationCoordinates.json')
+    .then(response => response.json())
+    .then(data => {
+        stationCoords = data;
+    })
+    .catch(error => {
+        console.error('❌ Fehler beim Laden der Stationskoordinaten:', error);
+    });
+
 // 1️⃣ 获取当前时间并构造 API URL
 function getCurrentTime() {
     const now = new Date();
@@ -93,15 +104,8 @@ function addStationsToMap() {
 
 // 4️⃣ 获取测量站的地理坐标
 function getStationCoordinates(stationId) {
-    const stationCoords = {
-        "DENW134": [51.4501, 7.0132],
-        "DENW043": [51.4458, 7.0154],
-        "DENW247": [51.4609, 7.0098],
-        "DENW024": [51.4550, 7.0200]
-    };
-
     if (!stationCoords[stationId]) {
-        console.warn(`⚠️ Keine Koordinaten für ${stationId} gefunden, Standardwert wird verwendet.`);
+        console.warn(`⚠️ Keine Koordinaten für ${stationId} gefunden, Standardwert wird verwendet。`);
         return [51.455643, 7.011555]; // 默认坐标
     }
     return stationCoords[stationId];
