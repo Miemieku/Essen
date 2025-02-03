@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 exports.handler = async function (event) {
-    // 解析前端传来的参数
+    // 解析前端传来的参数*
     const { date_from, date_to, time_from, time_to, station } = event.queryStringParameters;
 
     // 如果参数缺失，返回错误
