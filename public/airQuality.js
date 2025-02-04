@@ -23,7 +23,13 @@ function fetchStationCoordinates() {
             let stations = Array.isArray(data.data) ? data.data : Object.values(data.data);
 
             // 过滤出 Essen 
-            let filteredStations = stations.filter(entry => entry[3] === "Essen" && entry[6] === "null");// `3` 是城市名称字段
+            let filteredStations = stations.filter(entry => 
+                entry[3] === "Essen" && entry[6] === null
+            );
+            
+            // 先检查是否有匹配的 Essen 站点
+            console.log("📌 过滤后的 Essen 站点:", filteredStations);
+            // `3` 是城市名称字段
 
             if (filteredStations.length === 0) {
                 console.warn("⚠️ Keine Messstationen für Essen gefunden!");
