@@ -138,15 +138,26 @@ function showDataInPanel(stationId, timestamp, pollutantData) {
 }
 
 // 6️⃣ 监听用户点击 "Luftqualität" 复选框
-document.addEventListener("DOMContentLoaded", function () {
-    fetchStationCoordinates().then(() => {
-        document.getElementById("air-quality").addEventListener("change", function () {
-            if (this.checked) {
-                addStationsToMap();
-            } else {
-                Object.keys(mapMarkers).forEach(stationId => map.removeLayer(mapMarkers[stationId]));
-                mapMarkers = {};
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    const infoPanel = document.getElementById('info-panel');
+    const airQualityInfo = document.getElementById('air-quality-info');
+
+    // Beispiel: Funktion zum Anzeigen des Info-Panels
+    function showInfoPanel(stationData) {
+        airQualityInfo.textContent = `Station: ${stationData.stationId}, Stadt: ${stationData.city}, Lat: ${stationData.lat}, Lon: ${stationData.lon}`;
+        infoPanel.classList.add('visible');
+    }
+
+    // Beispiel: Event-Listener für Klick auf eine Messstation
+    document.querySelectorAll('.station-marker').forEach(marker => {
+        marker.addEventListener('click', function() {
+            const stationData = {
+                stationId: this.dataset.stationId,
+                city: this.dataset.city,
+                lat: this.dataset.lat,
+                lon: this.dataset.lon
+            };
+            showInfoPanel(stationData);
         });
     });
 });
