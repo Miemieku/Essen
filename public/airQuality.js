@@ -3,21 +3,16 @@ let stationCoords = {}; // 存储Essen的测量站点
 
 // 1️⃣ 获取测量站坐标（Essen）
 function fetchStationCoordinates() {
-    const apiUrl = `${API_BASE_URL}api=stationCoordinates`;
-
-    return fetch(apiUrl)
+    return fetch(STATION_API_URL)
         .then(response => response.json())
         .then(data => {
-            console.log("📌 Station API Antwort:", data); // ✅ 先检查返回的数据结构
+            console.log("📌 Alle Messstationen Daten:", data);
 
-            // ⛔ 先检查 `data.data` 是否存在
-            if (!data || !data.data || !Array.isArray(data.data)) {
-                console.warn("⚠️ Fehler: Datenstruktur ist unerwartet.", data);
-                return;
-            }
+            // 🚀 **确保 `data.data` 是数组**
+            let stations = Array.isArray(data.data) ? data.data : Object.values(data.data);
 
-            // ✅ 现在 `data.data` 确定是数组，可以使用 `.filter()`
-            let filteredStations = data.data.filter(entry => entry[3] === "Essen"); // `3` 是城市名称字段
+            // 过滤出 Essen 的测量站
+            let filteredStations = stations.filter(entry => entry[3] === "Essen"); // `3` 是城市名称字段
 
             if (filteredStations.length === 0) {
                 console.warn("⚠️ Keine Messstationen für Essen gefunden!");
@@ -33,7 +28,7 @@ function fetchStationCoordinates() {
                 stationCoords[stationId] = { city, lat, lon };
             });
 
-            console.log("📍 Gespeicherte Stationen für Essen:", stationCoords);
+            console.log("📍 Stationen in Essen gespeichert:", stationCoords);
         })
         .catch(error => {
             console.error("❌ Fehler beim Abrufen der Stationskoordinaten:", error);

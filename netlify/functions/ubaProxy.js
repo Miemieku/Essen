@@ -11,7 +11,6 @@ exports.handler = async function (event) {
     }
 
     let apiUrl;
-    
     if (api === "airQuality") {
         if (!date_from || !date_to || !time_from || !time_to || !station) {
             return {
@@ -39,38 +38,13 @@ exports.handler = async function (event) {
             throw new Error(`API-Fehler: ${response.status} ${response.statusText}`);
         }
 
-        let data = await response.json();
-        console.log("📊 API Antwort:", data);
+        const data = await response.json();
 
-        // ✅ 处理测量站 API 数据，筛选出 `Essen` 站点
-        if (api === "stationCoordinates") {
-            if (!data || !data.data) {
-                throw new Error("Keine Stationsdaten erhalten.");
-            }
+        // 🚀 **确保 `data.data` 是数组**
+        let formattedData = Array.isArray(data.data) ? data.data : Object.values(data.data);
 
-            let filteredStations = data.data.filter(entry => entry[3] === "Essen"); // `3` 是城市名称字段
+        console.log("📊 API Antwort (formatiert):", formattedData);
 
-            if (filteredStations.length === 0) {
-                return {
-                    statusCode: 404,
-                    body: JSON.stringify({ error: "Keine Messstationen für Essen gefunden!" })
-                };
-            }
-
-            console.log(`✅ Gefundene Messstationen für Essen:`, filteredStations);
-
-            return {
-                statusCode: 200,
-                headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, OPTIONS",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(filteredStations) // 只返回 `Essen` 的站点
-            };
-        }
-
-        // ✅ 处理空气质量 API
         return {
             statusCode: 200,
             headers: {
@@ -78,7 +52,7 @@ exports.handler = async function (event) {
                 "Access-Control-Allow-Methods": "GET, OPTIONS",
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({ ...data, data: formattedData }) // ✅ 确保 `data.data` 是数组
         };
     } catch (error) {
         console.error(`❌ Fehler bei API-Anfrage an ${apiUrl}:`, error.message);
