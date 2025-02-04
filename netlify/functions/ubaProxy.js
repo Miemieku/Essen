@@ -11,6 +11,7 @@ exports.handler = async function (event) {
     }
 
     let apiUrl;
+    
     if (api === "airQuality") {
         if (!date_from || !date_to || !time_from || !time_to || !station) {
             return {
@@ -38,9 +39,38 @@ exports.handler = async function (event) {
             throw new Error(`API-Fehler: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
+        let data = await response.json();
         console.log("📊 API Antwort:", data);
 
+        // ✅ 处理测量站 API 数据，筛选出 `Essen` 站点
+        if (api === "stationCoordinates") {
+            if (!data || !data.data) {
+                throw new Error("Keine Stationsdaten erhalten.");
+            }
+
+            let filteredStations = data.data.filter(entry => entry[3] === "Essen"); // `3` 是城市名称字段
+
+            if (filteredStations.length === 0) {
+                return {
+                    statusCode: 404,
+                    body: JSON.stringify({ error: "Keine Messstationen für Essen gefunden!" })
+                };
+            }
+
+            console.log(`✅ Gefundene Messstationen für Essen:`, filteredStations);
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, OPTIONS",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(filteredStations) // 只返回 `Essen` 的站点
+            };
+        }
+
+        // ✅ 处理空气质量 API
         return {
             statusCode: 200,
             headers: {
