@@ -2,10 +2,6 @@ const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/function
 let stationCoords = {}; // 存储Essen的测量站点
 
 // 1️⃣ 获取测量站坐标（Essen）
-const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/functions/ubaProxy?";
-let stationCoords = {}; // 存储Essen的测量站点
-
-// 1️⃣ 获取测量站坐标（Essen）
 function fetchStationCoordinates() {
     const apiUrl = `${API_BASE_URL}api=stationCoordinates`;
 
