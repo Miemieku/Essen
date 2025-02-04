@@ -11,7 +11,7 @@ function fetchStationCoordinates() {
             // 🚀 **确保 `data.data` 是数组**
             let stations = Array.isArray(data.data) ? data.data : Object.values(data.data);
 
-            // 过滤出 Essen 的测量站
+            // 过滤出 Essen 
             let filteredStations = stations.filter(entry => entry[3] === "Essen"); // `3` 是城市名称字段
 
             if (filteredStations.length === 0) {
