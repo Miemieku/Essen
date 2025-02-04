@@ -8,15 +8,24 @@ function fetchStationCoordinates() {
     return fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-            console.log("📌 Alle Messstationen für Essen:", data);
+            console.log("📌 Station API Antwort:", data); // ✅ 先检查返回的数据结构
 
-            if (!data || data.error) {
-                console.warn("⚠️ Keine gültigen Stationsdaten für Essen gefunden.");
+            // ⛔ 先检查 `data.data` 是否存在
+            if (!data || !data.data || !Array.isArray(data.data)) {
+                console.warn("⚠️ Fehler: Datenstruktur ist unerwartet.", data);
                 return;
             }
 
-            data.forEach(entry => {
-                let stationId = entry[1];  // `Code` 例如 "DENW134"
+            // ✅ 现在 `data.data` 确定是数组，可以使用 `.filter()`
+            let filteredStations = data.data.filter(entry => entry[3] === "Essen"); // `3` 是城市名称字段
+
+            if (filteredStations.length === 0) {
+                console.warn("⚠️ Keine Messstationen für Essen gefunden!");
+                return;
+            }
+
+            filteredStations.forEach(entry => {
+                let stationId = entry[1];  // Code，例如 "DENW134"
                 let city = entry[3];        // 城市名 "Essen"
                 let lat = parseFloat(entry[8]); // 纬度
                 let lon = parseFloat(entry[7]); // 经度
