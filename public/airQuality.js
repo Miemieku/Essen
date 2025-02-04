@@ -107,6 +107,10 @@ function addStationsToMap() {
             let latestTimestamp = timestamps[timestamps.length - 1];
             let pollutantData = result.data[latestTimestamp].slice(3);
 
+            let popupContent = `<h3>Messstation ${actualStationname}</h3>`;
+            pollutantData.forEach(entry => {
+                popupContent += `<p><b>ID ${entry[0]}:</b> ${entry[1]} µg/m³</p>`;
+            });
             let latLng = [stationCoords[stationId].lat, stationCoords[stationId].lon];
             let marker = L.marker(latLng).bindPopup(popupContent);
 
