@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 exports.handler = async function (event) {
-    const { api, date_from, date_to, time_from, time_to, station, city } = event.queryStringParameters;
+    const { api, date_from, date_to, time_from, time_to, station} = event.queryStringParameters;
 
     if (!api) {
         return {

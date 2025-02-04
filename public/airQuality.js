@@ -32,11 +32,12 @@ function fetchStationCoordinates() {
 
             filteredStations.forEach(entry => {
                 let stationId = entry[1];  // Code，例如 "DENW134"
+                let stationName = entry[2];  // 名称，例如 "Essen-Steele"
                 let city = entry[3];        // 城市名 "Essen"
                 let lat = parseFloat(entry[8]); // 纬度
                 let lon = parseFloat(entry[7]); // 经度
 
-                stationCoords[stationId] = { city, lat, lon };
+                stationCoords[stationId] = { city, stationName, lat, lon };
             });
 
             console.log("📍 Stationen in Essen gespeichert:", stationCoords);
@@ -106,11 +107,6 @@ function addStationsToMap() {
             let latestTimestamp = timestamps[timestamps.length - 1];
             let pollutantData = result.data[latestTimestamp].slice(3);
 
-            let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${latestTimestamp}</p>`;
-            pollutantData.forEach(entry => {
-                popupContent += `<p><b>ID ${entry[0]}:</b> ${entry[1]} µg/m³</p>`;
-            });
-
             let latLng = [stationCoords[stationId].lat, stationCoords[stationId].lon];
             let marker = L.marker(latLng).bindPopup(popupContent);
 
@@ -128,9 +124,9 @@ function addStationsToMap() {
 }
 
 // 5️⃣ 在右侧面板显示空气质量数据
-function showDataInPanel(stationId, timestamp, pollutantData) {
+function showDataInPanel(stationName, timestamp, pollutantData) {
     let panel = document.getElementById("air-quality-panel");
-    panel.innerHTML = `<h2>Messstation ${stationId}</h2><p><b>Messzeit:</b> ${timestamp}</p>`;
+    panel.innerHTML = `<h2>Messstation ${stationName}</h2><p><b>Zeit:</b> ${timestamp}</p>`;
     pollutantData.forEach(entry => {
         panel.innerHTML += `<p><b>ID ${entry[0]}:</b> ${entry[1]} µg/m³</p>`;
     });
