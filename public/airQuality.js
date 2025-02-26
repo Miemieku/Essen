@@ -85,7 +85,7 @@ function fetchAirQualityData(stationId) {
             }
 
              // ✅ 直接从 data.request.station 获取正确的 ID
-            const actualStationId = data.request?.station || stationId;
+            const actualStationId = Object.keys(data.data)[0]; // 确保 ID 正确
             console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
             return { stationId: actualStationId, data: data.data[actualStationId] };
