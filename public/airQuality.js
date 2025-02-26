@@ -83,21 +83,8 @@ function fetchAirQualityData(stationId) {
             return null;
         }
 
-        let actualStationId;
-        if (Array.isArray(data.data)) {
-            // ⚠️ 如果 data.data 是数组，尝试查找 stationId
-            actualStationId = stationId;
-            console.warn("⚠️ `data.data` ist ein Array, nutze stationId direkt!");
-        } else {
-            // 🚀 使用 API 响应中的 `request.station` 作为正确的站点 ID
-            actualStationId = data.request?.station || stationId;
-            console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
-        }
-
-        if (!data.data[actualStationId]) {
-            console.warn(`⚠️ Keine Messwerte für ${actualStationId} gefunden!`);
-            return null;
-        }
+        const actualStationId = Object.keys(data.data)[0]; // 确保 ID 正确
+        console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
         return { stationId: actualStationId, data: data.data[actualStationId] };
     })
