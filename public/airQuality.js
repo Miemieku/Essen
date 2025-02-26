@@ -73,33 +73,33 @@ function fetchAirQualityData(stationId) {
     const apiUrl = `${API_BASE_URL}api=airQuality&date_from=${date}&date_to=${date}&time_from=${hour}&time_to=${hour}&station=${stationId}`;
 
     console.log(`📡 API Anfrage für ${stationId}: ${apiUrl}`);
-
     return fetch(apiUrl)
     .then(response => response.json())
     .then(data => {
         console.log(`📌 API Antwort für ${stationId}:`, data);
 
-        if (!data || !data.data || data.data.length === 0) {
+        if (!data || !data.data) {
             console.warn(`⚠️ Keine Luftqualitätsdaten für ${stationId}`);
             return null;
         }
 
-        // 🛠 Falls `data.data` ein Array ist, das erste Element nehmen
-        let stationData;
+        let actualStationId;
         if (Array.isArray(data.data)) {
-            console.warn("⚠️ `data.data` ist ein Array, wird in Objekt konvertiert...");
-            stationData = data.data[0] || null;
+            // ⚠️ 如果 data.data 是数组，尝试查找 stationId
+            actualStationId = stationId;
+            console.warn("⚠️ `data.data` ist ein Array, nutze stationId direkt!");
         } else {
-            const actualStationId = data.request?.station || stationId;
-            stationData = data.data[actualStationId] || null;
+            // 🚀 使用 API 响应中的 `request.station` 作为正确的站点 ID
+            actualStationId = data.request?.station || stationId;
+            console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
         }
 
-        if (!stationData) {
-            console.warn(`⚠️ Keine Messwerte für ${stationId} gefunden!`);
+        if (!data.data[actualStationId]) {
+            console.warn(`⚠️ Keine Messwerte für ${actualStationId} gefunden!`);
             return null;
         }
 
-        return { stationId, data: stationData };
+        return { stationId: actualStationId, data: data.data[actualStationId] };
     })
         .catch(error => {
             console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error);
