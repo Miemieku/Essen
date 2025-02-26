@@ -84,7 +84,14 @@ function fetchAirQualityData(stationId) {
                 return null;
             }
 
-            const actualStationId = Object.keys(data.data)[0]; // 确保 ID 正确
+            // 🛠 如果 data.data 是数组，转换为对象
+            if (Array.isArray(data.data)) {
+                console.warn("⚠️ `data.data` ist ein Array, wird in Objekt konvertiert...");
+                data.data = data.data[0] || {}; // 取第一个元素
+            }
+            
+             // ✅ 直接从 data.request.station 获取正确的 ID
+            const actualStationId = data.request?.station || stationId;
             console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
             return { stationId: actualStationId, data: data.data[actualStationId] };
