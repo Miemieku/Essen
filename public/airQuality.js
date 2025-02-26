@@ -168,7 +168,14 @@ function addStationsToMap() {
 
 // 5️⃣ 在右侧面板显示空气质量数据
 function showDataInPanel(stationName, timestamp, pollutantData) {
+    console.log(`📊 Daten für Station ${stationName} werden im Panel angezeigt`);
     let panel = document.getElementById("air-quality-panel");
+
+    if (!panel) {
+        console.error("❌ Fehler: Element mit ID 'air-quality-panel' nicht gefunden");
+        return;
+    }
+
     panel.innerHTML = `<h2>Messstation ${stationName}</h2><p><b>Zeit:</b> ${timestamp}</p>`;
     pollutantData.forEach(entry => {
         panel.innerHTML += `<p><b>ID ${entry[0]}:</b> ${entry[1]} µg/m³</p>`;
