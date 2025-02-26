@@ -75,33 +75,32 @@ function fetchAirQualityData(stationId) {
     console.log(`📡 API Anfrage für ${stationId}: ${apiUrl}`);
 
     return fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            console.log(`📌 API Antwort für ${stationId}:`, data);
+    .then(response => response.json())
+    .then(data => {
+        console.log(`📌 API Antwort für ${stationId}:`, data);
 
-            if (!data || !data.data) {
-                console.warn(`⚠️ Keine Luftqualitätsdaten für ${stationId}`);
-                return null;
-            }
+        if (!data || !data.data || data.data.length === 0) {
+            console.warn(`⚠️ Keine Luftqualitätsdaten für ${stationId}`);
+            return null;
+        }
 
-            // 🛠 2️⃣ 直接从 `data.request.station` 获取正确的 `stationId`
+        // 🛠 Falls `data.data` ein Array ist, das erste Element nehmen
+        let stationData;
+        if (Array.isArray(data.data)) {
+            console.warn("⚠️ `data.data` ist ein Array, wird in Objekt konvertiert...");
+            stationData = data.data[0] || null;
+        } else {
             const actualStationId = data.request?.station || stationId;
-            console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
+            stationData = data.data[actualStationId] || null;
+        }
 
-            // 🛠 3️⃣ 确保 `data.data` 不是数组
-            if (Array.isArray(data.data)) {
-                console.warn("⚠️ `data.data` ist ein Array, wird in Objekt konvertiert...");
-                data.data = data.data[0] || {}; // 取第一个元素
-            }
+        if (!stationData) {
+            console.warn(`⚠️ Keine Messwerte für ${stationId} gefunden!`);
+            return null;
+        }
 
-            // 🛠 4️⃣ 确保 `data.data` 里有 `actualStationId`
-            if (!data.data[actualStationId]) {
-                console.warn(`⚠️ Keine Messwerte für ${actualStationId} gefunden!`);
-                return null;
-            }
-
-            return { stationId: actualStationId, data: data.data[actualStationId] };
-        })
+        return { stationId, data: stationData };
+    })
         .catch(error => {
             console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error);
             return null;
