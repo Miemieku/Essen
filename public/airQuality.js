@@ -1,6 +1,6 @@
 const API_BASE_URL = "https://datenplattform-essen.netlify.app/.netlify/functions/ubaProxy?";
 let stationCoords = {}; // 存储Essen的测量站点
-
+let components = {}; // 存储污染物 ID → 名称
 // 1️⃣ 获取测量站坐标（Essen）
 function fetchStationCoordinates() {
     const apiUrl = `${API_BASE_URL}api=stationCoordinates`;
@@ -94,6 +94,32 @@ function fetchAirQualityData(stationId) {
         });
 }
 
+// 获取污染物 ID → 名称
+fetch("./components.json") // 确保路径正确
+    .then(response => response.json())
+    .then(data => {
+        console.log("📌 Komponenten JSON Datei geladen:", data);
+
+        if (!data || !data[1]) {
+            console.warn("⚠️ Keine gültigen Schadstoffdaten gefunden!");
+            return;
+        }
+
+        // 遍历 JSON 数据，将污染物 ID 映射到名称和单位
+        Object.values(data).forEach(entry => {
+            const pollutantId = entry[0]; // 例如 "1"
+            const pollutantName = entry[2]; // 例如 "PM10"
+            const pollutantUnit = entry[3]; // 例如 "µg/m³"
+
+            components[pollutantId] = { name: pollutantName, unit: pollutantUnit };
+        });
+
+        console.log("📍 Schadstoff-Komponenten gespeichert:", components);
+    })
+    .catch(error => {
+        console.error("❌ Fehler beim Laden der Schadstoff-Komponenten:", error);
+    });
+
 // 4️⃣ 在地图上添加测量站点
 function addStationsToMap() {
     Object.keys(stationCoords).forEach(stationId => {
@@ -116,7 +142,11 @@ function addStationsToMap() {
            
             let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${latestTimestamp}</p>`;
             pollutantData.forEach(entry => {
-                popupContent += `<p><b>ID ${entry[0]}:</b> ${entry[1]} µg/m³</p>`;
+                let pollutantId = entry[0]; // 例如 3
+                let value = entry[1]; // 例如 50.2
+                let pollutantInfo = components[pollutantId] || { name: `ID ${pollutantId}`, unit: "" };
+
+                popupContent += `<p><b>${pollutantInfo.name}:</b> ${value} ${pollutantInfo.unit}</p>`;
             });
 
             let latLng = [stationCoords[stationId].lat, stationCoords[stationId].lon];
