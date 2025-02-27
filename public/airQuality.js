@@ -58,7 +58,7 @@ function fetchStationCoordinates() {
 function getCurrentTime() {
     const now = new Date();
     const date = now.toISOString().split("T")[0]; // YYYY-MM-DD
-    let hour = now.getHours() - 1; // 🚀 取上一个小时的数据
+    let hour = now.getHours() - 2; // 🚀 取上一个小时的数据
 
     if (hour < 0) {
         hour = 23; // 取前一天的 23:00 数据
