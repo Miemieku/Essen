@@ -129,16 +129,51 @@ function addStationsToMap() {
                 return;
             }
 
-            let actualStationId = result.stationId;
-            let timestamps = Object.keys(result.data);
-            if (timestamps.length === 0) {
+            // 第 1 步：获取 data 的最外层 key（如 ["0"]）
+            const topKeys = Object.keys(result.data);
+            if (topKeys.length === 0) {
                 console.warn(`⚠️ Keine Messwerte für ${actualStationId}`);
                 return;
             }
 
-            let latestTimestamp = timestamps[timestamps.length-1];
-            let actualTimestamp = result.data[latestTimestamp][0];
-            let pollutantData = result.data[latestTimestamp].slice(3); //跳过前三项
+            // 这里演示取最后一个 blockKey（也可以取 topKeys[0] 看需要）
+            const blockKey = topKeys[topKeys.length - 1];
+            const block = result.data[blockKey];
+            if (!block) {
+                console.warn(`⚠️ Keine Messwerte für ${actualStationId} - block`);
+                return;
+            }
+
+            // 第 2 步：拿到时间戳列表
+            const timeKeys = Object.keys(block);
+            if (timeKeys.length === 0) {
+                console.warn(`⚠️ Keine Messwerte für ${actualStationId}`);
+                return;
+            }
+
+            // 取最新时间戳
+            const latestTimestamp = timeKeys[timeKeys.length - 1];
+            const measurement = block[latestTimestamp];
+            if (!measurement) {
+                console.warn(`⚠️ Keine Messwerte für ${actualStationId} - ${latestTimestamp}`);
+                return;
+            }
+
+            // measurement["0"] 通常是测量时间字符串，如 "2025-02-27 12:00:00"
+            let actualTimestamp = measurement["0"];
+
+            // 收集污染物数据：假设索引 >= 3 才是真正的污染物数组
+            let pollutantData = [];
+            Object.keys(measurement).forEach(k => {
+                if (parseInt(k, 10) >= 3) {
+                    let entry = measurement[k];
+                    // 如果是数组，则把它合并到 pollutantData
+                    if (Array.isArray(entry)) {
+                        pollutantData = pollutantData.concat(entry);
+                    }
+                }
+            });
+
             // 构建弹窗内容
             let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${actualTimestamp}</p>`;
             pollutantData.forEach(entry => {
