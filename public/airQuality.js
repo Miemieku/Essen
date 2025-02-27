@@ -140,7 +140,8 @@ function addStationsToMap() {
             let pollutantData = result.data[latestTimestamp].slice(3);
 
             const { date, hour } = getCurrentTime();
-            let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${hour}</p>`;
+            const { stationName, lat, lon } = fetchStationCoordinates()[stationId];
+            let popupContent = `<h3>Messstation ${stationName}</h3><p><b>Messzeit:</b> ${hour}</p>`;
             pollutantData.forEach(entry => {
                 let pollutantId = entry[0]; // 例如 3
                 let value = entry[1]; // 例如 50.2
