@@ -58,7 +58,7 @@ function fetchStationCoordinates() {
 function getCurrentTime() {
     const now = new Date();
     const date = now.toISOString().split("T")[0]; // YYYY-MM-DD
-    let hour = now.getHours() - 2; // 🚀 取上一个小时的数据
+    let hour = now.getHours() - 2; // 🚀 取上2个小时的数据
 
     if (hour < 0) {
         hour = 23; // 取前一天的 23:00 数据
@@ -136,11 +136,11 @@ function addStationsToMap() {
                 return;
             }
 
-            let latestTimestamp = timestamps[timestamps.length];
+            let latestTimestamp = timestamps[timestamps.length-1];
             let pollutantData = result.data[latestTimestamp].slice(3);
 
            
-            let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${latestTimestamp}</p>`;
+            let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${hour}</p>`;
             pollutantData.forEach(entry => {
                 let pollutantId = entry[0]; // 例如 3
                 let value = entry[1]; // 例如 50.2
