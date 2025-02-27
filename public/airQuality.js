@@ -86,7 +86,7 @@ function fetchAirQualityData(stationId) {
         const actualStationId = data.request?.station; // 确保 ID 正确
         console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
-        return { stationId: actualStationId, data: data.data };
+        return { stationId: actualStationId, data: data.data[actualStationId] };
     })
         .catch(error => {
             console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error);
@@ -138,7 +138,7 @@ function addStationsToMap() {
             let latestTimestamp = timestamps[timestamps.length-1];
             let actualTimestamp = result.data[latestTimestamp][0];
             let pollutantData = result.data[latestTimestamp].slice(3);//跳过前三项
-            
+
             // 构建弹窗内容
             let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${actualTimestamp}</p>`;
             pollutantData.forEach(entry => {
