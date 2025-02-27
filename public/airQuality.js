@@ -136,7 +136,7 @@ function addStationsToMap() {
                 return;
             }
 
-            let latestTimestamp = timestamps[timestamps.length - 1];
+            let latestTimestamp = timestamps[timestamps.length];
             let pollutantData = result.data[latestTimestamp].slice(3);
 
            
