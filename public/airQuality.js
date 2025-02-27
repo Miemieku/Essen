@@ -86,7 +86,7 @@ function fetchAirQualityData(stationId) {
         const actualStationId = data.request?.station; // 确保 ID 正确
         console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
-        return { stationId: actualStationId, data: data.data[actualStationId] };
+        return { stationId: actualStationId, data: data.data[0] };
     })
         .catch(error => {
             console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error);
