@@ -128,7 +128,7 @@ function addStationsToMap() {
                 console.warn(`⚠️ Keine Luftqualitätsdaten ${stationId}`);
                 return;
             }
-
+            let actualStationId = result.stationId;
             // 第 1 步：获取 data 的最外层 key（如 ["0"]）
             const topKeys = Object.keys(result.data);
             if (topKeys.length === 0) {
