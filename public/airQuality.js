@@ -86,7 +86,7 @@ function fetchAirQualityData(stationId) {
         const actualStationId = data.request?.station; // 确保 ID 正确
         console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
-        return { stationId: actualStationId, data: data.data[actualStationId] };
+        return { stationId: actualStationId, data: data.data };
     })
         .catch(error => {
             console.error(`❌ Fehler beim Laden der Luftqualität für ${stationId}:`, error);
@@ -125,7 +125,7 @@ function addStationsToMap() {
     Object.keys(stationCoords).forEach(stationId => {
         fetchAirQualityData(stationId).then(result => {
             if (!result || !result.data) {
-                console.warn(`⚠️ Keine Luftqualitätsdaten für ${stationId}`);
+                console.warn(`⚠️ Keine Luftqualitätsdaten ${stationId}`);
                 return;
             }
 
@@ -139,7 +139,7 @@ function addStationsToMap() {
             let latestTimestamp = timestamps[timestamps.length-1];
             let actualTimestamp = result.data[latestTimestamp][0];
             let pollutantData = result.data[latestTimestamp].slice(3); //跳过前三项
-
+            // 构建弹窗内容
             let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${actualTimestamp}</p>`;
             pollutantData.forEach(entry => {
                 let pollutantId = entry[0]; // 例如 3
@@ -148,7 +148,7 @@ function addStationsToMap() {
 
                 popupContent += `<p><b>${pollutantInfo.name}:</b> ${value} ${pollutantInfo.unit}</p>`;
             });
-
+            // 创建 Leaflet Marker
             let latLng = [stationCoords[stationId].lat, stationCoords[stationId].lon];
             let marker = L.marker(latLng).bindPopup(popupContent);
 
