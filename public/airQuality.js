@@ -83,7 +83,7 @@ function fetchAirQualityData(stationId) {
             return null;
         }
 
-        const actualStationId = Object.keys(data.data)[0]; // 确保 ID 正确
+        const actualStationId = data.request?.station; // 确保 ID 正确
         console.log(`✅ Station ID Mapping: ${stationId} → ${actualStationId}`);
 
         return { stationId: actualStationId, data: data.data[actualStationId] };
@@ -140,9 +140,7 @@ function addStationsToMap() {
             let actualTimestamp = result.data[latestTimestamp][0];
             let pollutantData = result.data[latestTimestamp].slice(3); //跳过前三项
 
-            let stationName = stationCoords[stationId]?.name || `Messstation ${actualStationId}`;
-            console.log(`📍 Station ${actualStationId} (${stationName}) Daten:`, pollutantData);
-            let popupContent = `<h3>Messstation ${stationName}</h3><p><b>Messzeit:</b> ${actualTimestamp}</p>`;
+            let popupContent = `<h3>Messstation ${actualStationId}</h3><p><b>Messzeit:</b> ${actualTimestamp}</p>`;
             pollutantData.forEach(entry => {
                 let pollutantId = entry[0]; // 例如 3
                 let value = entry[1]; // 例如 50.2
